@@ -17,11 +17,10 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-import djongo
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+#BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -32,7 +31,7 @@ SECRET_KEY = '1a#^8kp=m^)$=k%axh1w#i7sx-7&2rrbgey#0p#tv&+y5h$14n'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [] 
+ALLOWED_HOSTS = ['182.92.131.21'] 
 
 
 # Application definition
@@ -78,7 +77,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'course_recommend.wsgi.application'
+WSGI_APPLICATION = 'wsgi.application'
 
 
 # Database
@@ -86,14 +85,13 @@ WSGI_APPLICATION = 'course_recommend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'djongo',
-        'NAME': 'mongodb-course-recommend',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mysql_course_recommend',
         'HOST' : '127.0.0.1',
-    },
-    'mysql': {
-        'ENGINE': 'mysql',
-        'NAME': 'mysql-course-recommend',
-        'HOST' : '127.0.0.1',        
+        'PORT': '3306',
+        'USER': 'root',
+        'PASSWORD': 'Programmerlzy,.2018',
+        'OPTIONS' : { 'charset' : 'utf8mb4' }, 
         }
 }
 
