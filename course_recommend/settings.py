@@ -31,7 +31,7 @@ SECRET_KEY = '1a#^8kp=m^)$=k%axh1w#i7sx-7&2rrbgey#0p#tv&+y5h$14n'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['182.92.131.21'] 
+ALLOWED_HOSTS = ['*'] 
 
 
 # Application definition
@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles', # 确保django.contrib.staticfiles已经添加到settings.INSTALLED_APPS中。
     # user define app
-    'blog',
+    'course',
     'DjangoUeditor',
     'test_app',
 ]
@@ -87,7 +87,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mysql_course_recommend',
-        'HOST' : '127.0.0.1',
+        'HOST' : '182.92.131.21',
         'PORT': '3306',
         'USER': 'root',
         'PASSWORD': 'Programmerlzy,.2018',

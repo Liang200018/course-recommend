@@ -20,22 +20,22 @@ from django.views.static import serve
 from django.conf import settings
 #导入配置文件里的文件上传配置
 
-from blog import views 
+from course import views 
 from test_app.views import get_name
 urlpatterns = [
-    path('', include('blog.urls')),
+    path('', include('course.urls')),
     path('',  views.ViewIndex, name='index'),#网站首页
-    path('list-<int:lid>.html', views.ViewList, name='list'),#列表页
-    path('show-<int:sid>.html', views.ViewShow, name='show'),#内容页
-    path('tag/<tag>', views.ViewTag, name='tags'),#标签列表页
-    path('s/', views.ViewSearch, name='search'),#搜索列表页
-    path('about/', views.ViewAbout, name='about'),#联系我们单页
+    # path('list-<int:lid>.html', views.ViewList, name='list'),#列表页
+    # path('show-<int:sid>.html', views.ViewShow, name='show'),#内容页
+    # path('tag/<tag>', views.ViewTag, name='tags'),#标签列表页
+    # path('s/', views.ViewSearch, name='search'),#搜索列表页
+    # path('about/', views.ViewAbout, name='about'),#联系我们单页
     
-    path('admin/', admin.site.urls),
-    path('blog/', include('blog.urls')), # 路由转发
-    path('ueditor/', include('DjangoUeditor.urls')), # 富文本编辑器
-    re_path('^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),#增加此行
+    # path('admin/', admin.site.urls),
+    # path('course/', include('course.urls')), # 路由转发
+    # path('ueditor/', include('DjangoUeditor.urls')), # 富文本编辑器
+    # re_path('^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),#增加此行
     
-    path('test_app/', include('test_app.urls')),
-    path('your-name/', get_name),
+    # path('test_app/', include('test_app.urls')),
+    # path('your-name/', get_name),
 ]
