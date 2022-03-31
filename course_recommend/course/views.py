@@ -3,43 +3,160 @@
 读取数据库中的对象，结合模板渲染
 '''
 from django.shortcuts import render
-from django.template import loader
 from django.http import HttpResponse
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
-from .models import *
+from .models import (User, UserCourse, Course, Category, 
+                     Tag, School, Teacher, Recommend)
+
+from course.recommend import ItemCF
+
+class PageResource:
+    
+    def __init__(self, page_name):
+        self.page_name = page_name
+        self.resource_list = {}
+        
+    def get_resource(self, name):
+        '''返回资源'''
+        if self.resource_list.get('name') is None:
+            raise AttributeError("%s not exists" % (name))
+        return self.resource_list['name']
+    
+    def set_resource(self, name, func, *args, **kwargs):
+        '''设置资源'''
+        resource = func(*args, **kwargs) # 获取资源
+        self.resource_list[name] = resource        
+
+    def __str__(self):
+        return "%s PageResource" % self.page_name
+        
+class PageResourceManager:
+    "管理多个页面的资源"
+    def __init__(self):
+        self.page_list = {}
+    
+    def get_page_resouce(self, page_name):
+        if self.page_list.get(page_name) is None:
+            raise AttributeError("%s page_resouce not exists" % (page_name))
+        return self.page_list[page_name]      
+    
+    def set_page_resource(self, page_name, page_resource):
+        if not isinstance(page_resource, PageResource):
+            raise TypeError("%s is not a PageResource object" % page_resource)
+        self.page_list[page_name] = page_resource
+
+
+page_manager = PageResourceManager()
+
+def view_with_resource(page_name):
+    '''带页面资源名称的装饰器'''
+    def resource_decorator(func):
+        def wrapper(*args, **kwargs): # 装饰器获取被修饰函数的参数
+            # print(page_name)
+            # print(func)
+            # print(args)
+            # print(kwargs)
+            pg_resource = page_manager.get_page_resouce(page_name=page_name)
+            resource_list = pg_resource.resource_list # 传递给resource_list
+            
+            request = args[0]
+            return func(request, resource_list=resource_list) # 视图函数执行
+            
+        wrapper.__name__ = func.__name__ # 不改变被修饰函数的名字
+        return wrapper
+    return resource_decorator   
+
 
 # 首页
-def ViewIndex(request):
+'''
+    allcategory = resource_list['allcategory'] # Category.objects.all() #通过Category表查出所有分类
     
-    # # model retrieve
-    # allcategory = Category.objects.all() #通过Category表查出所有分类
-    # allbanner = Banner.objects.filter(is_active=True)[0:4] # 首页幻灯片
+    # 展示轮播图
+    allbanner # Banner.objects.filter(is_active=True)[0:4] # 首页幻灯片
+    recommend #Recommend.objects.get(id=1)
     
-    # recommend = Recommend.objects.get(id=1)
-    # allrecommend = Article.objects.filter(recommend=recommend)[0:3] #查询推荐位ID为1的文章
-    # latest_article = Article.objects.all().order_by('-id')[0:10] # 最新文章
-    # hot = Article.objects.all().order_by('views')[:10] # 热门排序, 通过浏览数进行排序
+    # 获得首页课程推荐
+    allrecommend 
+    #Article.objects.filter(recommend=recommend)[0:3] #查询推荐位ID为1的文章
     
-    # # 排序规则
-    # # 这里是简单化通过切片选择
-    # hot_recommend = Article.objects.filter(recommend=Recommend.objects.get(id=3))[:6] # 热门推荐
+    # 获得最新课程推荐
+    latest_recommend  
+    #Article.objects.all().order_by('-id')[0:10] # 最新文章
     
-    # tags = Tag.objects.all()
+    # 获得课程热门排行
+    hot = resource_list['hot'] 
+    #Article.objects.all().order_by('views')[:10] # 热门排序, 通过浏览数进行排序
     
-    # # context
-    # context = {'allcategory': allcategory,
-    #            'allbanner': allbanner,
-    #            'allrecommend': allrecommend,
-    #            'latest_article': latest_article,
-    #            'hot': hot,
-    #            'hot_recommend': hot_recommend,
-    #            'tags': tags,
-    #            }
+    # 获得热门课程推荐列表
+    # 排序规则
+    # 这里是简单化通过切片选择
+    hot_recommend 
+    # Article.objects.filter(recommend=Recommend.objects.get(id=3))[:6] # 热门推荐
     
+    tags
+'''
 
-    # return render(request, template_name='index.html', context=context)
-    return HttpResponse("hello")
+
+# 得到index页面资源的方法
+def get_allcategory():
+    res = Category.objects.all().order_by('-index')
+    return res
+
+def get_allbanner():
+    '''return None 或者 资源'''
+    return None
+
+def get_allrecommend():
+    
+    return None
+
+def get_latest_recommend():
+    return None
+
+def get_hot():
+    return None
+
+def get_hot_recommend():
+    return None
+
+def get_tags():
+    return None
+
+
+r_index = PageResource('index')
+page_manager.set_page_resource('index', r_index) # 添加index页面资源
+r_index.set_resource('allcategory', func=get_allcategory)
+r_index.set_resource('allbanner', func=get_allbanner)
+r_index.set_resource('allrecommend', func=get_allrecommend)
+r_index.set_resource('latest_recommend', func=get_latest_recommend)
+r_index.set_resource('hot', func=get_hot)
+r_index.set_resource('hot_recommend', func=get_hot_recommend)
+r_index.set_resource('tags', func=get_tags)
+
+
+@view_with_resource('index') # 这里的page_name 要和page_manager.set_page_resource(page_name)一致
+def ViewIndex(request, **kwargs):
+    
+    # model retrieve
+    # 获得课程首页分类
+    resource_list = kwargs['resource_list'] if kwargs.get('resource_list') else None
+    
+    resource_context = {'allcategory': [],
+                'allbanner': [],
+                'allrecommend': [],
+                'latest_recommend': [],
+                'hot': [],
+                'hot_recommend': [],
+                'tags': [],
+                }
+    # 如果没有添加资源就为空列表
+    for key, value in resource_list.items():
+        if key in resource_context.keys() and value: 
+            resource_context[key] = value 
+
+    return render(request, template_name='index.html', context=resource_context)
+    # return HttpResponse("hello")
     
 
 # # 列表页

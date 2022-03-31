@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+ <link rel='stylesheet' id='stylesheet-css'  href='{% static 'css/login.css'%}' type='text/css' media='all' />
+ <meta charset="UTF-8">
+ <title>注册</title>
+</head>
+<body>
+ <div class="loginx">
+	 <form action="/register/" method="post">          
+		<h1 align="center">注册界面</h1>
+		{% csrf_token %}
+		{% if message %}
+        <div class="form-part alert alert-warning" role="alert">
+            <strong>{{ message }}</strong>
+         </div>
+        {% endif %}
+		<div class="form-part">
+			<label class="inline">用户名：</label>
+			<input class="col-2" type="text" name="username" id=""> <br>	
+		 </div>
+		<div class="form-part">
+			<label class="inline">密码：</label>
+			<input class="col-2" type="password" name="password" id=""> <br>
+		 	<small class="form-text text-muted" style="color: grey">密码必须是字母、数字或者特殊符号组成.</small>
+		 </div>
+		<div class="form-part">
+			<div class="col-2 button">
+				<a href="/login/" id="new-user">
+            	<ins>直接登录</ins>
+        	 	 </a>	
+				<input type="submit" name="submit" id="submit" value="确认注册">
+			 </div>
+
+		 </div>	
+	
+	 </form>
+ </div>
+</body>
+</html>

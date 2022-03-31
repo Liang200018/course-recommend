@@ -20,9 +20,17 @@ from django.views.static import serve
 from django.conf import settings
 #导入配置文件里的文件上传配置
 
-from course import views 
+from course import views
+import login.views as login_view
+ 
 from test_app.views import get_name
 urlpatterns = [
+    # 登录页
+    path('index/', views.ViewIndex),
+    path('login/', login_view.login),
+    path('register/', login_view.register),
+    path('logout/', login_view.logout),
+    
     path('', include('course.urls')),
     path('',  views.ViewIndex, name='index'),#网站首页
     # path('list-<int:lid>.html', views.ViewList, name='list'),#列表页
@@ -31,7 +39,7 @@ urlpatterns = [
     # path('s/', views.ViewSearch, name='search'),#搜索列表页
     # path('about/', views.ViewAbout, name='about'),#联系我们单页
     
-    # path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
     # path('course/', include('course.urls')), # 路由转发
     # path('ueditor/', include('DjangoUeditor.urls')), # 富文本编辑器
     # re_path('^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),#增加此行

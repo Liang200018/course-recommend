@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles', # 确保django.contrib.staticfiles已经添加到settings.INSTALLED_APPS中。
     # user define app
+    'login',
     'course',
     'DjangoUeditor',
     'test_app',

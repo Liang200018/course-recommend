@@ -6,5 +6,5 @@ save_non_project_files = False
 
 [main]
 version = 0.2.0
-recent_files = ['C:\\Users\\hzsdl\\.spyder-py3\\temp.py', 'course_recommend\\settings.py', 'test_app\\models.py', 'test_app\\views.py', 'test_app\\templates\\test_form.html', 'test_app\\settings.py', 'test_app\\urls.py', 'test_app\\templates\\name.html', 'blog\\urls.py', 'course_recommend\\urls.py', 'test_app\\tests.py', 'uwsgi.ini', 'settings.py', 'course_recommend\\asgi.py', 'course_recommend\\wsgi.py', 'blog\\apps.py', 'blog\\admin.py', 'blog\\models.py', 'blog\\views.py']
+recent_files = ['login\\models.py', 'login\\views.py', 'course\\models.py', 'login\\templates\\register.html', 'course\\views.py', '..\\..\\..\\360MoveData\\Users\\hzsdl\\Desktop\\untitled1.py']
 

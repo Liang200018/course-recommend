@@ -9,12 +9,12 @@ from DjangoUeditor.models import UEditorField #头部增加这行代码导入UEd
 
 # 用户
 class User(models.Model):
-    
-    u_id = models.CharField(max_length=20, primary_key=True, verbose_name="用户id") 
+    id = models.BigAutoField(primary_key=True)
+    u_id = models.CharField(max_length=20, unique=True, verbose_name="用户id") 
     name = models.CharField(max_length=255, blank=False, unique=True, 
                             verbose_name="用户名")
     password = models.CharField(max_length=20, blank=False, verbose_name="密码")
-    created_time = models.TimeField()
+    created_time = models.DateTimeField('注册时间', default=timezone.now())
     
     class Meta:
         db_table = "user"
@@ -140,7 +140,8 @@ class Recommend(models.Model):
         ('d', 'day'),
         ]
     id = models.BigAutoField(primary_key=True)
-    user = models.ForeignKey('user', on_delete=models.DO_NOTHING)
+    user = models.ForeignKey('user', to_field='u_id',
+                             on_delete=models.DO_NOTHING)
     course = models.ForeignKey('course', to_field='course_id', 
                                on_delete=models.DO_NOTHING)
     created_time = models.DateTimeField("推荐日期", default=timezone.now())
