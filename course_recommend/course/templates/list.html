@@ -15,22 +15,22 @@
                 </div>
                 <div class="row">
                         
-                        {% for a in category_article %}
+                        {% for a in category_course %}
                         <div class="article-box clearfix excerpt-1">
                             <div class="col-md-4">
                                 <div class="thumbnail">
-                                    <a href="{% url 'index' %}show-{{a.id}}.html" title="{{a.title}}">
+                                    <a href="{% url 'index' %}show-{{a.id}}.html" title="{{a.name}}">
                                         <img src="{% url 'index' %}media/{{a.img}}"
                                              srcset="{% url 'index' %}media/{{a.img}}"
-                                             alt="{{a.title}}" class="wp-post-image" width="240" height="160"/></a>
+                                             alt="{{a.name}}" class="wp-post-image" width="240" height="160"/></a>
                                 </div>
                             </div>
                             <div class="col-md-8">
                                 <h2><a href="{% url 'index' %}show-{{a.id}}.html" target="_blank"
-                                       title="{{a.title}}">{{a.title}}</a></h2>
+                                       title="{{a.name}}">{{a.name}}</a></h2>
                                 <p class="txtcont hidden-xs"><a href="{% url 'index' %}show-{{a.id}}.html"
                                                                 target="_blank"
-                                                                title="{{a.title}}">{{a.abstract}}</a></p>
+                                                                title="{{a.name}}">{{a.about}}</a></p>
                                 <div class="meta"><span class="label label-info"><a
                                         href="{% url 'index' %}list-{{a.category.id}}.html">{{category.name}}</a></span>
                                     <time class="item"><i
@@ -47,16 +47,16 @@
             <!-- 分页插件 -->
             <div class="pagination">
                 <ul>
-                    {% if category_article.has_previous %}
-                    <li class="prev-page"><a href="?page={{ category_article.previous_page_number }}">上一页</a></li>
+                    {% if category_course.has_previous %}
+                    <li class="prev-page"><a href="?page={{ category_course.previous_page_number }}">上一页</a></li>
                     {% else %}
                      <li class="prev-page"></li>
                     {% endif %}
 
 
-                        {% for num in category_article.paginator.page_range %}
+                        {% for num in category_course.paginator.page_range %}
                             {% if num %}
-                                {% ifequal num category_article.number %}
+                                {% ifequal num category_course.number %}
                                     <li class="active"><span>{{ num }}</span></li>
                                 {% else %}
                                     <li><a href="?page={{ num }}">{{ num }}</a></li>
@@ -67,15 +67,15 @@
                         {% endfor %}
 
 
-                        {% if category_article.has_next %}
-                            <li class="next-page"><a href="?page={{ category_article.next_page_number }}">下一页</a></li>
+                        {% if category_course.has_next %}
+                            <li class="next-page"><a href="?page={{ category_course.next_page_number }}">下一页</a></li>
                         {% else %}
                             <li class="prev-page"></li>
                         {% endif %}
                 </ul>
             </div>
 
-            <!-- /文章列表 -->
+            <!-- /课程列表 -->
         </section>
         <!-- /post-left -->
         <!-- /post-right -->

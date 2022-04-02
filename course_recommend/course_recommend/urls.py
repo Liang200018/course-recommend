@@ -26,6 +26,7 @@ import login.views as login_view
 from test_app.views import get_name
 urlpatterns = [
     # 登录页
+    
     path('index/', views.ViewIndex),
     path('login/', login_view.login),
     path('register/', login_view.register),
@@ -33,8 +34,10 @@ urlpatterns = [
     
     path('', include('course.urls')),
     path('',  views.ViewIndex, name='index'),#网站首页
-    # path('list-<int:lid>.html', views.ViewList, name='list'),#列表页
-    # path('show-<int:sid>.html', views.ViewShow, name='show'),#内容页
+    path('mycourse/', views.ViewMyCourse, name='mycourse'), # 查看自己的课程
+
+    path('list-<int:lid>.html', views.ViewList, name='list'),#列表页
+    path('show-<int:sid>.html', views.ViewShow, name='show'),#内容页
     # path('tag/<tag>', views.ViewTag, name='tags'),#标签列表页
     # path('s/', views.ViewSearch, name='search'),#搜索列表页
     # path('about/', views.ViewAbout, name='about'),#联系我们单页

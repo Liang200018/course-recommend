@@ -6,21 +6,21 @@
     <div id="main-container" class="container clearfix">
         <section class="post-left">
             <div class="breadcrumb">您的位置： <a itemprop="breadcrumb" href="{% url 'index' %}">首页</a> » <a
-                    href="{% url 'index' %}list-{{show.category.id}}.html">{{show.category.name}}</a> »
+                    href="{% url 'index' %}list-{{show.category.category_id}}.html">{{show.category.name}}</a> »
                 <span class="current">正文</div>
             <div class="post-main clearfix">
-                <h1 class="post-title">{{show.title}}</h1>
+                <h1 class="post-title">{{show.name}}</h1>
                 <div class="post-con clearfix">
                     <div class="article-meta">
-                        <span class="item">分类：<a href="{% url 'index' %}list-{{show.category.id}}.html" rel="category tag">{{show.category.name}}</a></span>
-                        <span class="item">作者：{{show.user}}</span>
-                        <span class="item">浏览：{{show.views}}</span>
+                        <span class="item">分类：<a href="{% url 'index' %}list-{{show.category.category_id}}.html" rel="category tag">{{show.category.name}}</a></span>
+                        <span class="item">课程名：{{show.name}}</span>
+                        <span class="item">选课人数：{{show.user_num}}</span>
                         <span class="item">{{show.created_time | date:"Y年m月d日"}}</span>
 
                     </div>
                     <article class="article-content">
-                        <p>{{show.abstract}}</p>
-                        <p>{{show.body}}</p>
+                        <p>{{show.prerequisites}}</p>
+                        <p>{{show.about}}</p>
                     </article>
 
                     <div class="post-tag"><span class="fa fa-tags" aria-hidden="true"></span>标签：
@@ -31,14 +31,14 @@
                     <div>
                         <div><b>上一篇：</b>
                                 {% if previous_blog %}
-                                <a href="{% url 'index' %}show-{{previous_blog.id}}.html" class="article-tag">{{previous_blog.title}}</a>
+                                <a href="{% url 'index' %}show-{{previous_course.id}}.html" class="article-tag">{{previous_course.name}}</a>
                                 {% else %}
                                 没有了
                                 {% endif %}
                         </div>
                         <div><b>下一篇：</b>
                                 {% if next_blog %}    
-                                <a href="{% url 'index' %}show-{{next_blog.id}}.html" class="article-tag">{{next_blog.title}}</a>
+                                <a href="{% url 'index' %}show-{{next_course.id}}.html" class="article-tag">{{next_course.name}}</a>
                                 {% else %}
                                 没有了
                                 {% endif %}
@@ -54,17 +54,17 @@
 
                 <div class="head clearfix"><span class="sp">您可能感兴趣的:</span></div>
                 <ul>
-                    {% for a in hot %}
+                    {% for a in allrecommend %}
                     <li>
                         <div class="pic">
-                            <a href="{% url 'index' %}show-{{a.id}}.html" title="{{a.title}}"><img
+                            <a href="{% url 'index' %}show-{{a.id}}.html" title="{{a.name}}"><img
                                     src="{% url 'index' %}media/{{a.img}}"
                                     srcset="{% url 'index' %}media/{{a.img}}"
                                     alt="{{a.title}}" class="wp-post-image" width="145"
                                     height="100"/></a>
                         </div>
                         <a class="descript " href="{% url 'index' %}show-{{a.id}}.html" rel="bookmark"
-                           title="{{a.title}}">{{a.title}}</a>
+                           title="{{a.name}}">{{a.name}}</a>
                     </li>
                     {% endfor %}
                 

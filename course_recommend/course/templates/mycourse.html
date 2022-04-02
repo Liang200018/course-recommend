@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<body class="home blog site-layout-2">
+
+
+    <div id="main-container" class="container clearfix">
+        <section class="post-left">
+            <div class="breadcrumb">您的位置： <a itemprop="breadcrumb" href="{% url 'index' %}">首页</a> » <span
+                    class="current">我的课程</span></div>
+            <div class="index-main clearfix">
+                <div class="main-title">
+                    <h4 class="post-left-title">喜欢课程</h4>
+                </div>
+                <div class="row">
+                        
+                        {% for a in page_obj %}
+                        <div class="article-box clearfix excerpt-1">
+                            <div class="col-md-4">
+                                <div class="thumbnail">
+                                    <a href="{% url 'index' %}show-{{a.id}}.html" title="{{a.name}}">
+                                        <img src="{% url 'index' %}media/{{a.img}}"
+                                             srcset="{% url 'index' %}media/{{a.img}}"
+                                             alt="{{a.name}}" class="wp-post-image" width="240" height="160"/></a>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <h2><a href="{% url 'index' %}show-{{a.id}}.html" target="_blank"
+                                       title="{{a.name}}">{{a.name}}</a></h2>
+                                <p class="txtcont hidden-xs"><a href="{% url 'index' %}show-{{a.id}}.html"
+                                                                target="_blank"
+                                                                title="{{a.name}}">{{a.about | truncatechars:250}}</a></p>
+                                <div class="meta"><span class="label label-info"><a
+                                        href="{% url 'index' %}list-{{a.category.id}}.html">{{a.category.name}}</a></span>
+                                    <time class="item"><i
+                                            class="fa fa-clock-o"></i>{{a.created_time|date:"Y年m月d日"}}
+                                    </time>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                </div>
+            </div>   
+
+
+            <!-- 分页插件 -->
+            <div class="pagination">
+                <ul>
+                    {% if page_obj.has_previous %}
+                    <li class="prev-page"><a href="?page={{ page_obj.previous_page_number }}">上一页</a></li>
+                    {% else %}
+                     <li class="prev-page"></li>
+                    {% endif %}
+
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if num %}
+                                {% ifequal num page_obj.number %}
+                                    <li class="active"><span>{{ num }}</span></li>
+                                {% else %}
+                                    <li><a href="?page={{ num }}">{{ num }}</a></li>
+                                {% endifequal %}
+                            {% else %}
+                                <li class="disabled"><span>...</span></li>
+                            {% endif %}
+                        {% endfor %}
+
+
+                        {% if page_obj.has_next %}
+                            <li class="next-page"><a href="?page={{ page_obj.next_page_number }}">下一页</a></li>
+                        {% else %}
+                            <li class="prev-page"></li>
+                        {% endif %}
+                </ul>
+            </div>
+
+            <!-- /课程列表 -->
+        </section>
+        <!-- /post-left -->
+        <!-- /post-right -->
+        {% include "right_hot_recommend.html" %}
+
+    </div>
+
+{% endblock %}

@@ -31,7 +31,7 @@ def login(request):
                 request.session['user_id'] = record.u_id
                 request.session['username'] = record.name
                 
-                return HttpResponseRedirect('/index.html')
+                return HttpResponseRedirect('/index/')
             else:
                 context['message'] = "账号或者密码错误"
                 return render(request, 'login.html', context=context)

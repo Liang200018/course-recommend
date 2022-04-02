@@ -56,16 +56,15 @@
                                 <div class="thumbnail">
                                     <a href="{% url 'index' %}show-{{a.id}}.html" title="{{a.name}}">
                                         <img src="media/{{ a.img }}"
-                                             srcset="media/article_img/2018/10/07/wpress29.jpg"
                                              alt="{{a.name}}" class="wp-post-image" width="240" height="160"/></a>
                                 </div>
                             </div>
                             <div class="col-md-8">
-                                <h2><a href="{% url 'index' %}/show-{{a.id}}.html" target="_blank" title="{{a.name}}">{{a.name}}</a></h2>
+                                <h2><a href="{% url 'index' %}show-{{a.id}}.html" target="_blank" title="{{a.name}}">{{a.name}}</a></h2>
                                 <p class="txtcont hidden-xs"><a href="/" target="_blank"
                                                                 title="{{a.name}}">{{a.about}}</a></p>
                                 <div class="meta"><span class="label label-info"><a
-                                        href="{% url 'index' %}list-{{ a.category.id }}.html">{{a.category.name}}</a></span>
+                                        href="{% url 'index' %}list-{{ a.category.category_id }}.html">{{a.category.name}}</a></span>
                                     <time class="item"><i class="fa fa-clock-o"></i>{{ a.created_time|date:"Y年m月d日" }}
                                     </time>
                                 </div>

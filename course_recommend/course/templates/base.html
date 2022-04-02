@@ -15,6 +15,56 @@
 <link rel='stylesheet' id='stylesheet-css'  href='{% static 'css/style.css'%}' type='text/css' media='all' />
 <link rel='stylesheet' id='raxus-css'  href='{%static 'css/raxus.css'%}' type='text/css' media='all' />
 <link rel='stylesheet' id='open-social-style-css'  href='{% static 'css/os.css' %}' type='text/css' media='all' />
+<style type="text/css">
+.dropbtn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+/* 容器 <div> - 需要定位下拉内容 */
+.dropdown {
+    position: fixed;
+    left: 0;
+    top: 10px;
+    height: 34px;
+    display: inline-block;
+}
+
+/* 下拉内容 (默认隐藏) */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+}
+
+/* 下拉菜单的链接 */
+.dropdown-content a {
+    color: black;
+    padding: 12px 12px;
+    text-decoration: none;
+    display: block;
+}
+
+/* 鼠标移上去后修改下拉菜单链接颜色 */
+.dropdown-content a:hover {background-color: #f1f1f1}
+
+/* 在鼠标移上去后显示下拉菜单 */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* 当下拉内容显示后修改下拉按钮的背景颜色 */
+.dropdown:hover .dropbtn {
+    background-color: #3e8e41;
+}
+</style>
 <meta name='robots' content='index,follow' />
 <meta name="keywords" content="课程推荐,在线课程">
 <meta name="description" content="为学习者推荐感兴趣的课程，方便学习者规划学习路线">
@@ -25,17 +75,17 @@
 <!-- 头部 -->
 <header class="fix-wrap" id="fix-wrap">
 <div class="fix-main clearfix pr" id="fix-main" _hover-ignore="1"> <a href="/" class="index-logo">
-    <img src='{% static "picture/black-logo.png" %}' alt="Python学院,Python!"></a>
+    <img src='{% static "picture/black_logo.png" %}' alt="在线课程推荐"></a>
 <nav class="nav fl">
     <ul id="fix-list" class="fix-list clearfix">
 
 	<li id="menu-item-24086" class="menu-item"><a href="/">首页</a></li>
 	{% for category in allcategory%}
 	<li id="menu-item-117720" class="menu-item">
-	 <a href="{% url 'index' %}list-{{ category.id }}.html">{{ category.name }}</a></li>
+	 <a href="{% url 'index' %}list-{{ category.category_id }}.html">{{ category.name }}</a></li>
 	{% endfor %}
 
-	<li id="menu-item-24086" class="menu-item"><a href="/about/">关于博主</a></li>
+	<li id="menu-item-24086" class="menu-item"><a href="/about/">关于网站</a></li>
 
 </ul>
 </nav>
@@ -44,6 +94,17 @@
         <input class="text" name="search" type="text" placeholder="输入关键字" value="">
         <button class="submit" type="submit"><i class="fa fa-search"></i></button>
     </form>
+    
+    <div class="dropdown">
+        <button class="dropbtn">我的</button>
+        <div class="dropdown-content">
+        <a href="{% url 'index' %}mycourse/">我的课程</a>
+        <a href="{% url 'index' %}login/">登录</a>
+        <a href="{% url 'index' %}register/">注册</a>
+        <a href="{% url 'index' %}logout/">退出</a>
+     </div
+    
+
 </div>
 </header>
 
@@ -55,8 +116,8 @@
 <!-- 底部 -->
 <footer class="footer">
 <div class="copyright"> © 2010- 2018 · All Rights Reserved
-    · <a href="https://www.django.cn">Django中文网</a>
-    · <a href="http://www.miibeian.gov.cn" target="_blank">湘ICP备17023990号</a> 版权所有 © Django中文网</div>
+    · <a>欢迎反馈</a>
+    · <a href="http://www.miibeian.gov.cn" target="_blank">该网站仅供学习探索交流</a> 版权所有 © 在线课程推荐</div>
 </footer>
 <script src="static/js/bundle.js"></script>
 <script type="text/javascript" src='{% static "js/view-history.js" %}'></script>
