@@ -16,6 +16,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.views.static import serve
+
+from django.conf.urls.static import static
+
 #导入静态文件模块
 from django.conf import settings
 #导入配置文件里的文件上传配置
@@ -40,14 +43,20 @@ urlpatterns = [
     path('show-<int:sid>.html', views.ViewShow, name='show'),#内容页
     path('like/', views.ReceiveLikeCourse, name='like_course'), # 接受用户喜欢课程的数据
     # path('tag/<tag>', views.ViewTag, name='tags'),#标签列表页
-    # path('s/', views.ViewSearch, name='search'),#搜索列表页
-    # path('about/', views.ViewAbout, name='about'),#联系我们单页
+    path('search/', views.ViewSearch, name='search'),#搜索列表页
+    path('about/', views.ViewAbout, name='about'),#联系我们单页
     
     path('admin/', admin.site.urls),
+    
+    re_path('^stiaic/(?P<path>.*)', serve,{'document_root': settings.STATIC_ROOT}), # 用于处理static里的文件
+
+    re_path('^media/(?P<path>.*)', serve,{'document_root': settings.MEDIA_ROOT}), # 用于处理上传的文件
+    
     # path('course/', include('course.urls')), # 路由转发
     # path('ueditor/', include('DjangoUeditor.urls')), # 富文本编辑器
     # re_path('^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),#增加此行
     
     # path('test_app/', include('test_app.urls')),
     # path('your-name/', get_name),
+    
 ]

@@ -10,11 +10,11 @@
 <meta name="apple-mobile-web-app-title" content="课程推荐网站">
 <title>课程推荐网站</title>
 
-<link rel='stylesheet' id='bootstrap-css'  href='{% static 'css/bootstrap.min.css' %}' type='text/css' media='all' />
-<link rel='stylesheet' id='fontawesome-css'  href='{% static 'css/font-awesome.min.css' %}' type='text/css' media='all' />
-<link rel='stylesheet' id='stylesheet-css'  href='{% static 'css/style.css'%}' type='text/css' media='all' />
-<link rel='stylesheet' id='raxus-css'  href='{%static 'css/raxus.css'%}' type='text/css' media='all' />
-<link rel='stylesheet' id='open-social-style-css'  href='{% static 'css/os.css' %}' type='text/css' media='all' />
+<link rel='stylesheet' id='bootstrap-css'  href="{% static 'css/bootstrap.min.css' %}" type='text/css' media='all' />
+<link rel='stylesheet' id='fontawesome-css'  href="{% static 'css/font-awesome.min.css' %}" type='text/css' media='all' />
+<link rel='stylesheet' id='stylesheet-css'  href="{% static 'css/style.css' %}" type='text/css' media='all' />
+<link rel='stylesheet' id='raxus-css'  href="{% static 'css/raxus.css' %}" type='text/css' media='all' />
+<link rel='stylesheet' id='open-social-style-css'  href="{% static 'css/os.css' %}" type='text/css' media='all' />
 <style type="text/css">
 .dropbtn {
     background-color: #4CAF50;
@@ -93,7 +93,7 @@
 </ul>
 </nav>
 
-    <form method="get" class="index-search  hidden-xs" action="/s/" >
+    <form method="get" class="index-search  hidden-xs" action="/search/" >
         <input class="text" name="search" type="text" placeholder="输入关键字" value="">
         <button class="submit" type="submit"><i class="fa fa-search"></i></button>
     </form>

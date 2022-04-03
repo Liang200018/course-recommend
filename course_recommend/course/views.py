@@ -513,7 +513,7 @@ def ViewMyCourse(request):
     if request and request.session.get('is_login'):
         user_id =  request.session.get('user_id')
         course_list = Course.objects.filter(
-            course_id__in=UserCourse.objects.filter(user_id=user_id).values_list('course_id', flat=True)
+            course_id__in=UserCourse.objects.filter(user_id=user_id, state=True).values_list('course_id', flat=True)
         )
     else:
         # request.session.get('is_login')): # 游客身份
@@ -604,28 +604,58 @@ def ReceiveLikeCourse(request):
 #         list = paginator.page(paginator.num_pages)  # 如果用户输入的页数不在系统的页码列表中时,显示最后一页的内容
 #     return render(request, 'tags.html', locals())
 
-# # 搜索页
-# def ViewSearch(request):
-    
-#     ss=request.GET.get('search')#获取搜索的关键词
-#     search_article = Article.objects.filter(title__icontains=ss)#获取到搜索关键词通过标题进行匹配
-    
-#     hot = Article.objects.filter(recommend=Recommend.objects.get(id=3))[:6] #右侧的热门推荐
-#     allcategory = Category.objects.all()
-    
-#     page = request.GET.get('page')
-#     tags = Tag.objects.all()
-#     paginator = Paginator(search_article, 10)
-#     try:
-#         list = paginator.page(page) # 获取当前页码的记录
-#     except PageNotAnInteger:
-#         list = paginator.page(1) # 如果用户输入的页码不是整数时,显示第1页的内容
-#     except EmptyPage:
-#         list = paginator.page(paginator.num_pages) # 如果用户输入的页数不在系统的页码列表中时,显示最后一页的内容
-#     return render(request, 'search.html', locals())
 
-# # 关于页
-# def ViewAbout(request):
-#     allcategory = Category.objects.all()
-#     return render(request, 'page.html',locals())
+
+# --------------------------
+def get_search_course(request):
+    ss=request.GET.get('search')#获取搜索的关键词
+    search_course = Course.objects.filter(name__icontains=ss)#获取到搜索关键词通过标题进行匹配
+    return search_course
+    
+# 搜索页
+r_search = PageResource('search')
+page_manager.set_page_resource('search', r_search) # 添加search页面资源
+@view_with_resource('search')
+def ViewSearch(request, **kwargs):
+    
+    # 共有资源
+    r_search.thread_set_resource('allcategory', func=get_allcategory)
+    r_search.thread_set_resource('hot_recommend', func=get_hot_recommend)
+    r_search.thread_set_resource('tags', func=get_tags)
+    
+    # 页面独有资源
+    r_search.thread_set_resource('search_course', func=get_search_course)
+    
+    # 通知，进程加载资源完成
+    r_search.notify()
+    
+    resource_list = kwargs['resource_list'] if kwargs.get('resource_list') else None
+    
+    resource_context = {'allcategory': [],
+                'hot_recommend': [],
+                'tags': [],
+                'search_course': [],
+                'ss': [],
+                'page_obj': [],
+                }
+    # 如果没有添加资源就为空列表
+    for key, value in resource_list.items():
+        if key in resource_context.keys() and value: 
+            resource_context[key] = value    
+
+    course_list = resource_context['search_course'] # 返回的课程列表
+    paginator = Paginator(course_list, 15)
+    
+    page_number = int(request.GET['page']) if request.GET.get('page') else 1
+    
+    page_obj = paginator.get_page(page_number) # 获取当前页码的记录
+
+    resource_context['page_obj'] = page_obj
+    resource_context['ss'] = request.GET.get('search') #获取搜索的关键词
+    return render(request, 'search.html', context=resource_context)
+
+# 关于页
+def ViewAbout(request):
+    allcategory = Category.objects.all()
+    return render(request, 'page.html',locals())
 
