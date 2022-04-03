@@ -38,6 +38,7 @@ urlpatterns = [
 
     path('list-<int:lid>.html', views.ViewList, name='list'),#列表页
     path('show-<int:sid>.html', views.ViewShow, name='show'),#内容页
+    path('like/', views.ReceiveLikeCourse, name='like_course'), # 接受用户喜欢课程的数据
     # path('tag/<tag>', views.ViewTag, name='tags'),#标签列表页
     # path('s/', views.ViewSearch, name='search'),#搜索列表页
     # path('about/', views.ViewAbout, name='about'),#联系我们单页

@@ -6,7 +6,7 @@ import threading
 import time
 
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 from .models import (User, UserCourse, Course, Category, 
@@ -527,6 +527,60 @@ def ViewMyCourse(request):
     
     print("执行结束")
     return render(request, template_name='mycourse.html', context={'page_obj': page_obj})
+
+
+def ReceiveLikeCourse(request):
+    '''判断是游客还是用户，接受用户上传的表单数据'''
+    if request and request.method == 'POST':
+        if request.session.get('is_login'): # 用户
+            user_id = request.session.get('user_id')
+            user_name = request.session['username']
+            form_data = request.POST
+            
+            # 处理对数据库数据的更改
+            opt = form_data.get('course-opt') # querydict多值字典，get返回第一个 
+            course_int_id = int(form_data.get('course-id')) # 隐藏域传入的课程id
+            
+            if opt == 'like':
+                state = True
+            elif opt == 'dislike':
+                state = False
+            else:
+                pass
+            
+            
+            
+            user = User.objects.get(u_id=user_id)
+            course = Course.objects.get(id=course_int_id)
+            origin = UserCourse.objects.filter(user=user_id, course=course.course_id) # 表中有记录
+        
+                
+            if len(origin) > 0:
+                origin[0].state=state # 表中有自增字段，不可以使用update更新
+                origin[0].save()
+                course = origin[0].course 
+                print("修改对课程的喜欢")
+            else:
+                user_course = UserCourse.objects.create(user=user, course=course, state=state)
+                user_course.save()
+                course = user_course.course
+                print("创建成功")
+                
+            # 更改课程的喜欢人数
+            if course.user_num is None: #空值
+                course.user_num = 1
+            else:
+                course.user_num += (1 if state else 0)
+            course.save()
+            print("更改course表课程的喜欢人数")
+            
+            referer = request.META['HTTP_REFERER']  # 来路
+            return HttpResponseRedirect(redirect_to=referer) 
+            
+        else:
+            return HttpResponseRedirect(redirect_to='/login/')
+    else:
+        return HttpResponse('GET非法请求, 请求方法应为POST')
 # def ViewPage(request):
 #     pass
 

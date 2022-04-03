@@ -1,5 +1,35 @@
 ﻿{% extends "base.html" %}
 
+{% block style %}
+<style type="text/css">
+    div .like {
+        color: #00868B;
+        text-align: right;
+        font-family: Sans-serif;
+        font-weight:bold;
+
+    }
+    div form.like {
+        position: relative;
+        margin-right: 0px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        height: 30px;
+    }
+    div form.like button {
+        float: right;
+        height: 30px;
+        width: 15%;
+        padding: 0, 10px, 0, 10px; 
+    }
+    div form.like select {
+        float: right;
+        width: 80px;
+        height: 30px;
+    }
+
+</style>
+{% endblock %}
 
 {% block content %} 
     <!-- /主体 -->
@@ -10,6 +40,19 @@
                 <span class="current">正文</div>
             <div class="post-main clearfix">
                 <h1 class="post-title">{{show.name}}</h1>
+                <div class="like">
+                    <p>如果你喜欢的话？</p>
+                    
+                    <form class="like" action="/like/" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" id="course_id" name="course-id" style="display:none" value="{{show.id}}"/>
+                        <button type="submit" name="submit" value="submit">提交</button>
+                        <select name="course-opt">
+                          <option value="like" selected>喜欢</option>
+                          <option value="dislike">不喜欢</option>
+                         </select>
+                     </form>
+                 </div>
                 <div class="post-con clearfix">
                     <div class="article-meta">
                         <span class="item">分类：<a href="{% url 'index' %}list-{{show.category.category_id}}.html" rel="category tag">{{show.category.name}}</a></span>
