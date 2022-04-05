@@ -68,11 +68,12 @@ class ItemCF:
             sql = sql +' '  + 'limit %s' % (limit_num)
         print(sql)
         res = None
-        try:
-            cursor.execute(sql)
-            res = cursor.fetchall()
-        except Exception as e:
-            print(e.args)
+        # try:
+        cursor.execute(sql)
+        res = cursor.fetchall()
+        
+        # except Exception as e:
+            # print(e.args)
         return res
         
     def get_data_from_db(self):
@@ -101,7 +102,7 @@ class ItemCF:
         ItemCF.courses_id_name = {course['course_id']: course['name'] for course in courses} # 用户id和name的dict,{id1: '计算机组成原理'}
 
         ItemCF.user_course = self._select_all(cursor, 'user_course', ['user_id', 'course_id'],
-                                              limit_num=10000)
+                                              )
         
         cursor.close()
 
@@ -148,10 +149,16 @@ class ItemCF:
         
         for user, items in train.items():
             for i in items:
+                if N.get(i) is None:
+                    N.setdefault(i, 0)
                 N[i] += 1            
                 
                 for j in items:
                     if i != j:
+                        C.setdefault(i, {})
+                        C[i].setdefault(j, 0)
+                        C.setdefault(j, {})
+                        C[j].setdefault(i, 0)
                         C[i][j] += 1
                         C[j][i] += 1
     
@@ -200,9 +207,11 @@ class ItemCF:
         
         # for i, pi in user_item_set.items():
         for i, pi in zip(train[user], [1] * len(train[user])):
+            
+            W.setdefault(i, {}) # 临时处理数据不一致问题
             for j, wj in sorted(W[i].items(), key=lambda d: d[1], reverse=True)[0: k]: # rij为物品i与j的相关系数
-                # if j not in rank.keys():
-                if self.courses_id_name[j] not in rank.keys():
+                if j not in rank.keys():
+                # if self.courses_id_name[j] not in rank.keys():
                     rank[j] = {'weight': 0, 'reason': []}
                     # rank[self.courses_id_name[j]] = {'weight': 0, 'reason': []}
                     
@@ -211,8 +220,10 @@ class ItemCF:
                     rank[j]['reason'].append(i)
                     # rank[self.courses_id_name[j]]['weight'] += pi * wj
                     # rank[self.courses_id_name[j]]['reason'].append(self.courses_id_name[i])
-        return {item: wh_reason for item, wh_reason in rank.items() if wh_reason['weight'] > 0} # K个相关
-        
+        res = {item: wh_reason for item, wh_reason in rank.items() if wh_reason['weight'] > 0} # K个相关
+        res = sorted(res.items(), key=lambda x: x[1]['weight'], reverse=True)
+        return res
+    
     def recommend_to_all(self):
         pass
     
