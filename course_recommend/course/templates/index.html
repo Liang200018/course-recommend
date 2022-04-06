@@ -1,5 +1,5 @@
 ﻿{% extends "base.html" %}
-
+{% load filter_html_escape %}
 {% block content %}
 
 <body class="home blog site-layout-2">
@@ -34,7 +34,7 @@
                         {% for rc in allrecommend %}
                             <div class="caption">
                                 <h4><a href="{% url 'index' %}show-{{ rc.id }}.html" title="{{rc.name}}" rel="bookmark">{{rc.name}}</a></h4>
-                                <p>{{rc.about | truncatechars:"80"}}</p>
+                                <p>{{rc.about | truncatechars_html:80 | striptags}}</p>
                             </div>
                         {% endfor %}
 
@@ -62,7 +62,7 @@
                             <div class="col-md-8">
                                 <h2><a href="{% url 'index' %}show-{{a.id}}.html" target="_blank" title="{{a.name}}">{{a.name}}</a></h2>
                                 <p class="txtcont hidden-xs"><a href="/" target="_blank"
-                                                                title="{{a.name}}">{{a.about}}</a></p>
+                                                                title="{{a.name}}">{{a.about | truncatechars_html:150 | striptags}}</a></p>
                                 <div class="meta"><span class="label label-info"><a
                                         href="{% url 'index' %}list-{{ a.category.category_id }}.html">{{a.category.name}}</a></span>
                                     <time class="item"><i class="fa fa-clock-o"></i>{{ a.created_time|date:"Y年m月d日" }}

@@ -102,7 +102,7 @@ class ItemCF:
         ItemCF.courses_id_name = {course['course_id']: course['name'] for course in courses} # 用户id和name的dict,{id1: '计算机组成原理'}
 
         ItemCF.user_course = self._select_all(cursor, 'user_course', ['user_id', 'course_id'],
-                                              )
+                                              limit_num=1000)
         
         cursor.close()
 

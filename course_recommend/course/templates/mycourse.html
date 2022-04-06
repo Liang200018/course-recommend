@@ -30,7 +30,7 @@
                                        title="{{a.name}}">{{a.name}}</a></h2>
                                 <p class="txtcont hidden-xs"><a href="{% url 'index' %}show-{{a.id}}.html"
                                                                 target="_blank"
-                                                                title="{{a.name}}">{{a.about | truncatechars:250}}</a></p>
+                                                                title="{{a.name}}">{{a.about | truncatechars_html:150 | striptags}}</a></p>
                                 <div class="meta"><span class="label label-info"><a
                                         href="{% url 'index' %}list-{{a.category.id}}.html">{{a.category.name}}</a></span>
                                     <time class="item"><i

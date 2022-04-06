@@ -514,7 +514,7 @@ def ViewMyCourse(request):
         user_id =  request.session.get('user_id')
         course_list = Course.objects.filter(
             course_id__in=UserCourse.objects.filter(user_id=user_id, state=True).values_list('course_id', flat=True)
-        )
+        ).order_by('course_id')
     else:
         # request.session.get('is_login')): # 游客身份
         course_list = []

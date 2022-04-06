@@ -62,8 +62,10 @@
 
                     </div>
                     <article class="article-content">
-                        <p>{{show.prerequisites}}</p>
-                        <p>{{show.about}}</p>
+                    {% autoescape off %}
+                        {{show.prerequisites}}
+                        {{show.about}}
+                    {% endautoescape %}
                     </article>
 
                     <div class="post-tag"><span class="fa fa-tags" aria-hidden="true"></span>标签：
