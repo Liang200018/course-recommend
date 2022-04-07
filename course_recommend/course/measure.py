@@ -1,7 +1,7 @@
 import random
 from abc import ABC, abstractmethod
-from course.recommend import ItemCF
-
+from course.recommend import ItemCF, LFMRecommend
+from course_recommend import settings # 引入用户自定义设置
 
     
 class Recommend:
@@ -60,9 +60,12 @@ class Recommend:
 
 class ItemCFModel(Recommend):
     
+     
+    
     def __init__(self, model):
         self.model = model
-        self.model.get_data_from_db()
+        self.model.get_data_from_db(limit_num=settings.limit_num)
+        # 模型训练数据， 默认全部，测试时可以给传比较小的数字
         
         self.parameters = {} # 模型的参数
         # 得到全部的数据集
@@ -97,8 +100,49 @@ class ItemCFModel(Recommend):
         ru = [tum[0] for tum in res] 
         return ru
 
+class LFModel(Recommend):
+    
+    def __init__(self, model):
+        self.model = model
+        self.model.get_data_from_db()
+        
+        self.parameters = {} # 模型的参数
+        # 得到全部的数据集
+        self.user_items = self.model.get_user_items()
+        
+    def fit(self, train):
+        '''传入训练集数据，训练模型
+        train :dict {user: []}
+        '''
+        self.model.LatentFactorModel(user_items=self.user_items, train=train)
+        
+        
+        self.parameters['P'] = self.model.P
+        self.parameters['Q'] = self.model.Q
+        self.parameters['F'] = self.model.F
+        self.parameters['N'] = self.model.N
+        self.parameters['alpha'] = self.model.alpha
+        self.parameters['lambda_'] = self.model.lambda_
+    
+        
+    def recommend(self, user, N):
+        """
+        Parameters
+        ----------
+        user : TYPE
+            DESCRIPTION.
+        N : TYPE
+            DESCRIPTION.
 
+        Returns
+        -------
+        None.
 
+        """
+        res = self.model.recommend_to_one(user, N)
+        ru = [tum[0] for tum in res] 
+        return ru
+    
 # In[]
 # 评测指标
 def random_split_train_test(data, M, k, seed):
@@ -114,40 +158,92 @@ def random_split_train_test(data, M, k, seed):
     return train, test
 
 # In[]
-
-item_cf_model = ItemCFModel(model=ItemCF(5))
-data = item_cf_model.user_items
-
-# In[]
-user_item = []
-for user, items in data.items():
-    for item in items:
-        user_item.append((user, item))
-# In[]
-train_list, test_list = random_split_train_test(user_item, 3, 1, seed=1)
-
-train = {}
-for u, item in train_list:
-    if train.get(u) is None:
-        train[u] = [item]
-    else:
-        train[u].append(item)
-
-test = {}
-for u, item in test_list:
-    if test.get(u) is None:
-        test[u] = [item]
-    else:
-        test[u].append(item)
-item_cf_model.fit(train)
-
-# In[]
-# res = item_cf_model.recommend('7001215', 10)
-# In[]
-# for i in range(1, 20):
-precision = item_cf_model.precision(train, test, 3)
-print("precision:%s" % (precision))
+# if __name__ == '__main__':
     
-# In[]
-recall = item_cf_model.recall(train, test, 10)
-print("recall:%s" % (recall))
+#     # 减少分快执行代码，变量被覆盖
+#     select_model = input("输入执行的模型：1:ItemCF\n2:LFM:")
+#     if select_model == '1':
+        
+#         item_cf_model = ItemCFModel(model=ItemCF(5))
+#         data = item_cf_model.user_items
+
+#         # In[]
+#         user_item = []
+#         for user, items in data.items():
+#             for item in items:
+#                 user_item.append((user, item))
+#         # In[]
+#         train_list, test_list = random_split_train_test(user_item, 3, 1, seed=1)
+        
+#         train = {}
+#         for u, item in train_list:
+#             if train.get(u) is None:
+#                 train[u] = [item]
+#             else:
+#                 train[u].append(item)
+        
+#         test = {}
+#         for u, item in test_list:
+#             if test.get(u) is None:
+#                 test[u] = [item]
+#             else:
+#                 test[u].append(item)
+#         item_cf_model.fit(train)
+
+        # In[]
+        # res = item_cf_model.recommend('7001215', 10)
+        # # In[]
+        # # for i in range(1, 20):
+        # precision = item_cf_model.precision(train, test, 3)
+        # print("precision:%s" % (precision))
+            
+        # # In[]
+        # recall = item_cf_model.recall(train, test, 10)
+        # print("recall:%s" % (recall))
+
+
+    # else:
+        
+# In[] LFModel
+if __name__ == '__main__':
+    lfmodel = LFModel(LFMRecommend(F=10, N=100, alpha=0.02, lambda_=0.01))
+    data = lfmodel.user_items
+    
+    user_item = []
+    for user, items in data.items():
+        for item in items:
+            user_item.append((user, item))
+    # In[]
+    train_list, test_list = random_split_train_test(user_item, 3, 1, seed=1)
+    
+    train = {}
+    for u, item in train_list:
+        if train.get(u) is None:
+            train[u] = [item]
+        else:
+            train[u].append(item)
+    
+    test = {}
+    for u, item in test_list:
+        if test.get(u) is None:
+            test[u] = [item]
+        else:
+            test[u].append(item)
+            
+    # In[]
+    
+    lfmodel.fit(train)
+    
+    # In[]
+    for i in range(3, 15):
+        precision = lfmodel.precision(train, test, i)
+        print("%s precision:%s" % (i, precision))
+        
+    # In[]
+    for i in range(3, 15):
+        recall = lfmodel.recall(train, test, i)
+        print("%s recall:%s" % (i, recall))
+    
+    # In[]
+    res = lfmodel.recommend('10140938', 10)       
+    print(res)

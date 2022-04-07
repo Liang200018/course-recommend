@@ -12,22 +12,9 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from .models import (User, UserCourse, Course, Category, 
                      Tag, School, Teacher, Recommend)
 
-from course.recommend import ItemCF
+from course.recommend import ItemCF, LFMRecommend
+from course.measure import ItemCFModel, LFModel
 
-
-def init_recommend_engine():
-    """
-    Returns
-    -------
-    item_cf : ItemCF
-    W: list[list]
-        返回推荐对象.
-    """
-    item_cf = ItemCF(5) # 负责全部的用户推荐
-    item_cf.get_data_from_db()
-    user_items = item_cf.get_user_items()
-    W = item_cf.ItemSimilarity(train=user_items)
-    return (item_cf, user_items, W)
 
 class PageResource:
     """每一个视图函数被触发，都会新建实例
@@ -80,10 +67,10 @@ class PageResource:
         None.
         """
         combined_args = (name, func) + args
-        print(combined_args)
+        # print(combined_args)
         t = threading.Thread(target=self.set_resource, args=combined_args, kwargs=kwargs)
         
-        print("创建新的线程加载资源")
+        # print("创建新的线程加载资源")
         while 1:
             if len(self.thread_list) <= 10:
                 self.thread_list.append(t) # 加入线程列表
@@ -92,7 +79,7 @@ class PageResource:
             else:
                 time.sleep(1)
                 break
-        print(len(self.thread_list))
+        # print(len(self.thread_list))
     
     
     def set_resource(self, name, func, *args, **kwargs):
@@ -147,7 +134,11 @@ class PageResourceManager:
 
 
 page_manager = PageResourceManager()
-item_cf, user_items, W = init_recommend_engine()
+
+itemcf_model = ItemCFModel(ItemCF(5)) 
+train = itemcf_model.model.user_items # 生产模式下，用全部数据
+itemcf_model.fit(train=train) # 必须要训练后，才可以recommend
+
 
 def view_with_resource(page_name):
     '''带页面资源名称的装饰器
@@ -186,7 +177,7 @@ def view_with_resource(page_name):
             # print(page_name)
             # print(func)
             # print(args)
-            print(kwargs)
+            # print(kwargs)
             pg_resource = page_manager.get_page_resouce(page_name=page_name) # 获得视图函数中的页面资源管理器
             request = args[0]
             pg_resource.request = request   # 一些动态资源需要结合request获取
@@ -242,24 +233,42 @@ def get_allbanner(request):
     print("执行结束")
     return None
 
-def get_allrecommend(request):
+def get_allrecommend(request, **kwargs):
+    """不同地方的推荐，给的推荐列表大小不一样
+    kwargs :
+        option N 推荐列表的大小
+    """
+    
     # 用户身份
+    N = kwargs['N'] if kwargs.get('N') else 3
     res = {}
     if request and request.session.get('is_login'):
         user_id =  request.session.get('user_id')
-        course_id_dict = item_cf.recommend_to_one(train=user_items, user=user_id, W=W)
-        course_id_list = list(course_id_dict.keys())
+        
+        course_id_list = itemcf_model.recommend(user=user_id,  N=N)
+        
+        # To-do LFM模型读取两个矩阵，获取推荐列表
+        # 直接读取LFM的结果，LFM模型把推荐结果写到推荐表中，供读取
+        
         print(course_id_list)
         if len(course_id_list) > 0:
-            res = Course.objects.filter(course_id__in=course_id_dict)
+            res = []
+            # 按照course_id_list 调整顺序
+            for course_id in course_id_list:
+                course = Course.objects.get(course_id=course_id)
+                res.append(course)
+            
+            # To-do 重排环节, 根据课程内容提取特征，将与已选择课程内容相近的课程排名提高。
+            
+            return res
         else:
-            res = Course.objects.all().order_by('?')[:3] # 用户没有选择课程
+            res = Course.objects.all().order_by('?')[:N] # 用户没有选择课程
         print(user_id)
         
     else:
         # request.session.get('is_login')): # 游客身份
-        res = Course.objects.all().order_by('?')[:3]
-        print(res)
+        res = Course.objects.all().order_by('?')[:N]
+        # print(res)
     
     # print("get all recommend")
     print("执行结束")
@@ -281,11 +290,10 @@ def get_hot_recommend(request):
     res = {}
     if request and request.session.get('is_login'):
         user_id =  request.session.get('user_id')
-        course_id_dict = item_cf.recommend_to_one(train=user_items, user=user_id, W=W)
-        course_id_list = list(course_id_dict.keys())
+        course_id_list = itemcf_model.recommend(user=user_id,  N=20) # 推荐20个
         # print(course_id_list)
         if len(course_id_list) > 0:
-            res = Course.objects.filter(course_id__in=course_id_dict).order_by('-user_num')[:10]
+            res = Course.objects.filter(course_id__in=course_id_list).order_by('-user_num')[:10]
         else:
             res = Course.objects.all().order_by('-user_num')[:10] # 用户没有选择课程
         # print(user_id)
@@ -479,7 +487,7 @@ def ViewShow(request, sid=None, **kwargs):
     r_show.thread_set_resource('hot_recommend', func=get_hot_recommend)
     r_show.thread_set_resource('tags', func=get_tags)
     
-    r_show.thread_set_resource('allrecommend', func=get_allrecommend) #内容下面的您可能感兴趣的文章，随机推荐
+    r_show.thread_set_resource('allrecommend', func=get_allrecommend, N=20) #内容下面的您可能感兴趣的文章，随机推荐
     
     # 页面独有资源
     r_show.thread_set_resource('show', func=get_show_course, sid=sid)
