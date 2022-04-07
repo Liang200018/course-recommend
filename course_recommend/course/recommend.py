@@ -126,6 +126,7 @@ class RetrieveData:
         return user_items 
     
     
+
 class ItemCF(RetrieveData):
     
     W = [] # 物品归一化矩阵

@@ -247,3 +247,4 @@ if __name__ == '__main__':
     # In[]
     res = lfmodel.recommend('10140938', 10)       
     print(res)
+    

@@ -16,6 +16,7 @@ from course.recommend import ItemCF, LFMRecommend
 from course.measure import ItemCFModel, LFModel
 
 
+
 class PageResource:
     """每一个视图函数被触发，都会新建实例
     """
