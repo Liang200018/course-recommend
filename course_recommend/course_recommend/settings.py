@@ -17,11 +17,9 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-from django.conf.static import serve
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-#BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -30,7 +28,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SECRET_KEY = '1a#^8kp=m^)$=k%axh1w#i7sx-7&2rrbgey#0p#tv&+y5h$14n'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*'] 
 
@@ -138,10 +136,14 @@ STATIC_URL = '/static/'
 
 #这个是设置静态文件夹目录的路径
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'dev_static'),
 )
-STATIC_ROOT = os.path.join(BASE_DIR,"static")
+
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 #设置文件上传路径，图片上传、文件上传都会存放在此目录里
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# 用户自定义设置
+limit_num = 1000
