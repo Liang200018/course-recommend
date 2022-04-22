@@ -14,6 +14,8 @@ import pymysql
 
 from collections import Counter
 
+from course.utils import construct_sql
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -44,32 +46,21 @@ class RetrieveData:
     
     def __init__(self):
         pass
+    
+    def reConnect(self):
+        self.conn.ping(reconnect=True) # 如果连接失效，重新连接 
 
-    def _select_all(self, cursor, table_name, col_list=None, limit_num=None):
-        """
-        Parameters
-        ----------
-        cursor : 
-        table_name : 表名
-        col_list : list
-            字段列表.
+    def _select_all(self, cursor, table_name, col_list=None, limit_num=None, where=None):
 
-        Returns
-        -------
-        list, 列表中元素为元组
-        """
-        if col_list:
-            col_str = ','.join(col_list)
-        else:
-            col_str = '*'
-        sql = '''select %s from %s''' % (col_str, table_name)
-        if limit_num:
-            sql = sql +' '  + 'limit %s' % (limit_num)
+        sql = construct_sql(table_name, col_list, limit_num, where)
         print(sql)
+        
         res = None
         # try:
-        cursor.execute(sql)
-        res = cursor.fetchall()
+        self.reConnect()
+        with self.conn.cursor() as cursor: 
+            cursor.execute(sql)
+            res = cursor.fetchall()
         
         # except Exception as e:
             # print(e.args)
@@ -84,28 +75,28 @@ class RetrieveData:
             DESCRIPTION.
 
         """
-        
-        cursor = self.conn.cursor()
-        
-        # 获取数据库的数据
-        users = self._select_all(cursor, 'user', ['u_id'])
-        self.users_pool = [tup[0] for tup in users]
-        
-        
-        courses = self._select_all(cursor, 'course', ['course_id', 'name'])
-        
-        courses = [{
-            'course_id': tup[0], 'name': tup[1] } for tup in courses]
-        self.items_pool = [c['course_id'] for c in courses] #候选项集合
-        
-        self.courses_id_name = {course['course_id']: course['name'] for course in courses} # 用户id和name的dict,{id1: '计算机组成原理'}
-
-        if limit_num:    
-            self.user_course = self._select_all(cursor, 'user_course', ['user_id', 'course_id'],
-                                              limit_num=limit_num)
-        else: # 为空时读取全部数据
-            self.user_course = self._select_all(cursor, 'user_course', ['user_id', 'course_id'],)            
-        cursor.close()
+        self.reConnect()
+        with self.conn.cursor() as cursor:
+            
+            # 获取数据库的数据
+            users = self._select_all(cursor, 'user', ['u_id'])
+            self.users_pool = [tup[0] for tup in users]
+            
+            
+            courses = self._select_all(cursor, 'course', ['course_id', 'name'])
+            
+            courses = [{
+                'course_id': tup[0], 'name': tup[1] } for tup in courses]
+            self.items_pool = [c['course_id'] for c in courses] #候选项集合
+            
+            self.courses_id_name = {course['course_id']: course['name'] for course in courses} # 用户id和name的dict,{id1: '计算机组成原理'}
+    
+            if limit_num:    
+                self.user_course = self._select_all(cursor, 'user_course', ['user_id', 'course_id'],
+                                                  limit_num=limit_num)
+            else: # 为空时读取全部数据
+                self.user_course = self._select_all(cursor, 'user_course', ['user_id', 'course_id'],)            
+            
 
         
     def write_data_to_db(self):
@@ -126,6 +117,7 @@ class RetrieveData:
         return user_items 
     
     
+
 class ItemCF(RetrieveData):
     
     W = [] # 物品归一化矩阵
@@ -239,6 +231,7 @@ class ItemCF(RetrieveData):
     def recommend_to_all(self):
         pass
 
+        
 
 class LFMRecommend(RetrieveData):
     # courses_id_name = None # {}
@@ -247,20 +240,26 @@ class LFMRecommend(RetrieveData):
     train = None # 需要作为类变量， 来去除推荐列表中的已经看过的
     P, Q = None, None
     
-    def __init__(self, F, N, alpha, lambda_):
+    def __init__(self, ):
+        pass
+    
+    def lazy_init(self, F, N, alpha, lambda_, ntimes=1, hot_rank=20):
         """
         F: 隐特征的个数
         N: 迭代次数
         alpha: 学习率
         lambda_: 正则化惩罚系数
+        ntimes: 负样本/正样本的比例
+        hot_rank: int 物品前n名算作热门
         """
         self.F = F
         self.N = N
         self.alpha = alpha
         self.lambda_ = lambda_
-        
+        self.ntimes = ntimes 
+        self.hot_rank = hot_rank
     
-    def _InitModel(self):
+    def InitModel(self):
         '''初始化P、Q矩阵
         '''
         P, Q = {}, {}
@@ -350,17 +349,32 @@ class LFMRecommend(RetrieveData):
         if isinstance(items, list):
             for item in items:
                 ret[item] = 1
+                
+        hot_course = [t[0] for t in self.hot.most_common(self.hot_rank)]
+        
         n = 0
-        for i in range(0, len(items) * 3): # 为了确保正负样本数量相似
+        while 1:
+            # 为了确保正负样本数量相似
             item = self.items_pool[random.randint(0, len(self.items_pool)) - 1] #随机选择一个候选项
             if item in ret.keys(): # 已经选择作为负样本，跳过
                 continue
             
-            hot_course = [t[0] for t in self.hot.most_common(20)]
+            
             if item in hot_course: # 是热门，且没有被选择
                 ret[item] = 0
                 n += 1
-            if n > len(items): #选择和正样本数量相同的负样本
+            elif n > (0.6 * len(hot_course)): 
+                # 非热门课程, 但是热门课程数目已经被选择60%
+                ret[item] = 0
+                n += 1
+            else:
+                continue
+            
+            print("the length of items: %s" % len(items))
+            print("selected %s negative items" % n)
+            
+            if (n > self.ntimes * len(items)): 
+                #选择负样本策略, 热门物品选择完，或者超过正样本的倍数
                 break
         
         return ret
@@ -384,25 +398,29 @@ class LFMRecommend(RetrieveData):
         全部用户和全部item构成的矩阵
         train :dict 训练集中的数据，用于估计矩阵参数
         '''
-        self._InitModel() # P用户-兴趣矩阵， Q兴趣-物品矩阵
+        
         self.train = train
         alpha = self.alpha
+        
+        operator = 0
         for i in range(0, self.N):
             for user, items in user_items.items():
                 # 注意：需要在所有样本上进行矩阵参数的估计
                 if train.get(user) is None: #训练集中没有该数据，跳过
                     continue
                 
+                
                 samples = self.RandomSelectHotNagtiveSample(user, train) # 从训练集中返回正样本和负样本
                 for item, rui in samples.items():
                     pui = self._predict(user, item) # 预测用户对物品的选择，0-1之间的某一个数值
                     eui = rui - pui # 误差
-                for k in range(0, self.F):
-                    self.P[user][k] += alpha * eui * (self.Q[k][item] - self.lambda_ * self.P[user][k])
-                    self.Q[k][item] += alpha * eui * (self.P[user][k] - self.lambda_ * self.Q[k][item])
+                    for k in range(0, self.F):
+                        operator += 1
+                        self.P[user][k] += alpha * eui * (self.Q[k][item] - self.lambda_ * self.P[user][k])
+                        self.Q[k][item] += alpha * eui * (self.P[user][k] - self.lambda_ * self.Q[k][item])
             # 根据学习率不是均匀变化的，迭代计算，减少预测误差
             alpha = alpha * 0.9
-            
+            print("Operator: %s" % operator)
             
     def recommend_to_one(self, user, N=10):
         """

@@ -56,11 +56,11 @@
 
                         {% for num in tag_article.paginator.page_range %}
                             {% if num %}
-                                {% ifequal num tag_article.number %}
+                                {% if num == tag_article.number %}
                                     <li class="active"><span>{{ num }}</span></li>
                                 {% else %}
                                     <li><a href="?page={{ num }}">{{ num }}</a></li>
-                                {% endifequal %}
+                                {% endif %}
                             {% else %}
                                 <li class="disabled"><span>...</span></li>
                             {% endif %}

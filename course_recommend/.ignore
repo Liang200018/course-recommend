@@ -1,0 +1,10 @@
+.spyproject/
+
+*.pyc
+# 临时产生的pyc文件
+
+/static/
+# 静态文件夹不更改
+
+test_app/ 
+# 忽略test_app文件夹下的所有文件

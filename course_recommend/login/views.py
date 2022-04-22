@@ -2,7 +2,9 @@ from django.shortcuts import render
 
 from django.http import HttpResponse, HttpResponseRedirect
 
-from course.models import User
+from course.models import User, UserCourse
+
+
 # Create your views here.
 
 def index(request):
@@ -30,6 +32,7 @@ def login(request):
                 request.session['is_login']=True
                 request.session['user_id'] = record.u_id
                 request.session['username'] = record.name
+                request.session['items'] = {'test': 'test'}
                 
                 return HttpResponseRedirect('/index/')
             else:
@@ -66,10 +69,28 @@ def register(request):
     
     return render(request, 'register.html', context=context)
 
+
+
+from course.views import icf_model
+
+
 def logout(request):
     context = {}
     # 如果不是登陆状态，无法登出
     if request.session.get('is_login'):
+        user_id = request.session['user_id']
+        
+        item_set = [course_id for course_id, state in request.session['items'].items() 
+                    if state is True]
+        # icf_model.model.writeToDB(userid, item_set=items_dict) # 将会话数据写入
+        items = icf_model.model.getActiveItemByUserid(user_id, item_set=item_set)
+        
+        db_user_items = UserCourse.objects.filter(user_id=user_id, state=True).values_list('course_id', flat=True)
+        db_user_items = [item for item in icf_model.model.Items] # 注意：数据库中存在的，并且是训练数据
+        
+        icf_model.model.updateIntByDB(items, db_user_items)
+        icf_model.model.updateS()
+        print("更新ICF")
         request.session.flush()
     # 返回到登录界面
     return HttpResponseRedirect('/login/')

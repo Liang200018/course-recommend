@@ -35,7 +35,6 @@ urlpatterns = [
     path('register/', login_view.register),
     path('logout/', login_view.logout),
     
-    path('', include('course.urls')),
     path('',  views.ViewIndex, name='index'),#网站首页
     path('mycourse/', views.ViewMyCourse, name='mycourse'), # 查看自己的课程
 

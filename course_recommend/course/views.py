@@ -13,7 +13,9 @@ from .models import (User, UserCourse, Course, Category,
                      Tag, School, Teacher, Recommend)
 
 from course.recommend import ItemCF, LFMRecommend
-from course.measure import ItemCFModel, LFModel
+from course.icf import ICF
+from course.measure import ItemCFModel, LFModel, ICFModel
+
 
 
 class PageResource:
@@ -135,9 +137,14 @@ class PageResourceManager:
 
 page_manager = PageResourceManager()
 
-itemcf_model = ItemCFModel(ItemCF(5)) 
-train = itemcf_model.model.user_items # 生产模式下，用全部数据
-itemcf_model.fit(train=train) # 必须要训练后，才可以recommend
+# itemcf_model = ItemCFModel(ItemCF(5)) 
+# train = itemcf_model.model.user_items # 生产模式下，用全部数据
+# itemcf_model.fit(train=train) # 必须要训练后，才可以recommend
+
+icf = ICF()
+train, users_pool, items_pool = icf.getData(limit_num=1000) # 生产模式下，用全部数据
+icf_model = ICFModel(model=icf)
+icf_model.fit(train, items_pool, users_pool) # 提前计算
 
 
 def view_with_resource(page_name):
@@ -245,7 +252,7 @@ def get_allrecommend(request, **kwargs):
     if request and request.session.get('is_login'):
         user_id =  request.session.get('user_id')
         
-        course_id_list = itemcf_model.recommend(user=user_id,  N=N)
+        course_id_list = icf_model.recommend(user=user_id,  N=N)
         
         # To-do LFM模型读取两个矩阵，获取推荐列表
         # 直接读取LFM的结果，LFM模型把推荐结果写到推荐表中，供读取
@@ -290,7 +297,7 @@ def get_hot_recommend(request):
     res = {}
     if request and request.session.get('is_login'):
         user_id =  request.session.get('user_id')
-        course_id_list = itemcf_model.recommend(user=user_id,  N=20) # 推荐20个
+        course_id_list = icf_model.recommend(user=user_id,  N=20) # 推荐20个
         # print(course_id_list)
         if len(course_id_list) > 0:
             res = Course.objects.filter(course_id__in=course_id_list).order_by('-user_num')[:10]
@@ -537,6 +544,28 @@ def ViewMyCourse(request):
     return render(request, template_name='mycourse.html', context={'page_obj': page_obj})
 
 
+def updateUserCourse(user_id, course_int_id, state):
+    """插入或者更新用户课程表中的记录
+    
+    """
+    user = User.objects.get(u_id=user_id)
+    course = Course.objects.get(id=course_int_id)
+    origin = UserCourse.objects.filter(user=user_id, course=course.course_id) # 表中有记录
+
+        
+    if len(origin) > 0:
+        origin[0].state=state # 表中有自增字段，不可以使用update更新
+        origin[0].save()
+        course = origin[0].course 
+        print("修改对课程的喜欢")
+    else:
+        user_course = UserCourse.objects.create(user=user, course=course, state=state)
+        user_course.save()
+        course = user_course.course
+        print("创建成功")
+    return course
+    
+    
 def ReceiveLikeCourse(request):
     '''判断是游客还是用户，接受用户上传的表单数据'''
     if request and request.method == 'POST':
@@ -557,23 +586,13 @@ def ReceiveLikeCourse(request):
                 pass
             
             
+            course = updateUserCourse(user_id, course_int_id, state)
             
-            user = User.objects.get(u_id=user_id)
-            course = Course.objects.get(id=course_int_id)
-            origin = UserCourse.objects.filter(user=user_id, course=course.course_id) # 表中有记录
-        
-                
-            if len(origin) > 0:
-                origin[0].state=state # 表中有自增字段，不可以使用update更新
-                origin[0].save()
-                course = origin[0].course 
-                print("修改对课程的喜欢")
-            else:
-                user_course = UserCourse.objects.create(user=user, course=course, state=state)
-                user_course.save()
-                course = user_course.course
-                print("创建成功")
-                
+            if state is True:
+                request.session['items'][course.course_id] = state 
+                request.session.modified = True
+                print(request.session['items'])
+            
             # 更改课程的喜欢人数
             if course.user_num is None: #空值
                 course.user_num = 1

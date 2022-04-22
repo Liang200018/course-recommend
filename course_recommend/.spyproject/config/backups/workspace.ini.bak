@@ -6,5 +6,5 @@ save_non_project_files = False
 
 [main]
 version = 0.2.0
-recent_files = ['login\\models.py', 'login\\views.py', 'course\\models.py', 'course\\views.py', 'course\\utils.py', 'course\\templates\\list.html', 'course\\recommend.py', 'course_recommend\\urls.py', 'settings.py', 'uwsgi.ini', 'course\\measure.py', 'course\\tests.py', '..\\..\\..\\anaconda2021\\lib\\socket.py']
+recent_files = ['course\\icf.py', 'course\\utils.py', 'course\\recommend.py', 'course\\measure.py', 'course\\apps.py', 'course\\views.py']
 
