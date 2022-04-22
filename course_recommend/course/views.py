@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 '''
 前后端结合的地方，涉及到数据库和HTMl
 读取数据库中的对象，结合模板渲染
@@ -43,8 +42,8 @@ class PageResource:
         
         for t in self.thread_list:
             t.join()
-        print("%s个线程" % len(self.thread_list)) # 注意线程start后才存在
-        print("所有加载资源的线程结束")
+        # print("%s个线程" % len(self.thread_list)) # 注意线程start后才存在
+        # print("所有加载资源的线程结束")
         
         # 线程不同start两次
         # 完成资源的加载后，清理线程，和request
@@ -109,7 +108,7 @@ class PageResource:
             if self.request: # 准备加载
                 resource = func(request=self.request, *args, **kwargs) # 获取资源
                 self.resource_list[name] = resource
-                print("页面资源加载完毕")
+                # print("页面资源加载完毕")
                 break
             else:
                 # 阻塞还是异步？
@@ -146,7 +145,7 @@ icf = ICF()
 train, users_pool, items_pool = icf.getData(limit_num=1000) # 生产模式下，用全部数据
 icf_model = ICFModel(model=icf)
 icf_model.fit(train, items_pool, users_pool) # 提前计算
-
+del train # 得到共现矩阵和相似度后释放
 
 def view_with_resource(page_name):
     '''带页面资源名称的装饰器
@@ -233,12 +232,12 @@ def view_with_resource(page_name):
 # 得到index页面资源的方法, 静态资源，动态资源
 def get_allcategory(request):
     res = Category.objects.all().order_by('-index')
-    print("执行结束")
+    # print("执行结束")
     return res
 
 def get_allbanner(request):
     '''return None 或者 资源'''
-    print("执行结束")
+    # print("执行结束")
     return None
 
 def get_allrecommend(request, **kwargs):
@@ -258,7 +257,7 @@ def get_allrecommend(request, **kwargs):
         # To-do LFM模型读取两个矩阵，获取推荐列表
         # 直接读取LFM的结果，LFM模型把推荐结果写到推荐表中，供读取
         
-        print(course_id_list)
+        print("Func get_allrecommend: %s" % course_id_list)
         if len(course_id_list) > 0:
             res = []
             # 按照course_id_list 调整顺序
@@ -276,21 +275,15 @@ def get_allrecommend(request, **kwargs):
     else:
         # request.session.get('is_login')): # 游客身份
         res = Course.objects.all().order_by('?')[:N]
-        # print(res)
-    
-    # print("get all recommend")
-    print("执行结束")
+
     return res
 
 def get_latest_recommend(request):
     res = Course.objects.all().order_by('-id')[0:100]
-    print("执行结束")
-    print("最新课程 %s" % len(res))
     return res 
 
 def get_hot(request):
     res = Course.objects.all().order_by('-user_num')[0:10]
-    print("执行结束")
     return res
 
 def get_hot_recommend(request):
@@ -308,13 +301,11 @@ def get_hot_recommend(request):
     else:
         # request.session.get('is_login')): # 游客身份
         res = Course.objects.all().order_by('-user_num')[:10]
-        print(res)
-    print("执行结束")
     return res
+
 
 def get_tags(request):
     res = Tag.objects.all()
-    print("执行结束")
     return res
 
 
@@ -352,7 +343,6 @@ def ViewIndex(request, **kwargs):
             resource_context[key] = value 
 
     return render(request, template_name='index.html', context=resource_context)
-    # return HttpResponse("hello")
 
     
 
@@ -386,8 +376,7 @@ def get_category(request, *args, **kwargs):
         print(e.args)
     except Exception as e:
         print(e.args)
-    
-    print("执行结束")
+
     return res
 
 # 列表页
@@ -430,7 +419,6 @@ def get_show_course(request, *args, **kwargs):
     '''得到课程'''
     res = []
     sid = int(kwargs['sid']) if kwargs.get('sid') else None
-    print("sid: ", sid)
     try:
         show = Course.objects.get(id=sid)
     except (Category.DoesNotExist, Category.MultipleObjectsReturned) as e:
@@ -440,7 +428,6 @@ def get_show_course(request, *args, **kwargs):
     else:
         #获取通过URL传进来的lid，然后筛选出对应文章
         res = show
-    print("执行结束")
     return res
 
 def get_previous_course(request, **kwargs):
@@ -458,7 +445,6 @@ def get_previous_course(request, **kwargs):
         print(e.args)
     else:
         res = show
-    print("执行结束")
     return res    
 
 def get_next_course(request, **kwargs):
@@ -475,7 +461,6 @@ def get_next_course(request, **kwargs):
         print(e.args)
     else:
         res = show
-    print("执行结束")
     return res    
 
 
@@ -535,13 +520,11 @@ def ViewMyCourse(request):
         # request.session.get('is_login')): # 游客身份
         course_list = []
     
-    print(course_list)
     paginator = Paginator(course_list, 15)
     
     page_number = int(request.GET['page']) if request.GET.get('page') else 1
     page_obj = paginator.get_page(page_number)
     
-    print("执行结束")
     return render(request, template_name='mycourse.html', context={'page_obj': page_obj})
 
 
@@ -558,12 +541,12 @@ def updateUserCourse(user_id, course_int_id, state):
         origin[0].state=state # 表中有自增字段，不可以使用update更新
         origin[0].save()
         course = origin[0].course 
-        print("修改对课程的喜欢")
+        # print("修改对课程的喜欢")
     else:
         user_course = UserCourse.objects.create(user=user, course=course, state=state)
         user_course.save()
         course = user_course.course
-        print("创建成功")
+        # print("创建成功")
     return course
     
     
@@ -592,7 +575,7 @@ def ReceiveLikeCourse(request):
             if state is True:
                 request.session['items'][course.course_id] = state 
                 request.session.modified = True
-                print(request.session['items'])
+                # print(request.session['items'])
             
             # 更改课程的喜欢人数
             if course.user_num is None: #空值

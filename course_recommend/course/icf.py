@@ -96,12 +96,12 @@ class ICF(Singleton):
                         (self.Int[i][j] / (math.sqrt(self.N[i]* self.N[j]) * 1.0)), 4)
                         
                 
-    def recommend_to_one(self, train, user):
+    def recommend_to_one(self, train=None, user=None):
         """
         Parameters
         ----------
         train : TYPE
-            DESCRIPTION.
+            生产环境中不需要.
         user : str
             用户id.
             
@@ -116,8 +116,14 @@ class ICF(Singleton):
 
         rank = {} 
         try:
-            user_item_set = train[user] 
-        except KeyError as e: # 用户没有数据
+            fetcher = RetrieveData()
+            user_item_set = fetcher._select_all(cursor=None, table_name='user_course',
+                                         col_list=['course_id'], where='user_id=%s' % (user))
+          
+            user_item_set = [t[0] for t in user_item_set]
+            
+            # user_item_set = train[user]  # 模型训练时
+        except KeyError as e: # 新增用户没有数据
             print(e.args)
             return []
         

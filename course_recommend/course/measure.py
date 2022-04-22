@@ -165,7 +165,7 @@ class ICFModel(Recommend):
         self.parameters['Int'] = self.model.Int
         self.parameters['S'] = self.model.S
         self.parameters['N'] = self.model.N
-        self.parameters['train'] = train
+        # self.parameters['train'] = train # 生产环境中不需要
         
     def recommend(self, user, N):
         """给每个用户推荐，产生TOPN推荐列表; 模型计算准确度、召回率，需要该方法。
@@ -181,8 +181,8 @@ class ICFModel(Recommend):
             DESCRIPTION.
 
         """
-        train = self.parameters['train'] 
-        
+        # train = self.parameters['train'] 
+        train = None # 生产环境
         res = self.model.recommend_to_one(train=train, user=user)[0:N]       
         ru = [tum[0] for tum in res] 
         return ru
