@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # -*- coding: utf-8 -*-
 """
 Created on Thu Mar 31 16:13:53 2022
@@ -454,28 +455,3 @@ class LFMRecommend(RetrieveData):
                     rank[item] += puk * qki
         return sorted(rank.items(), key=lambda d: d[1], reverse=True)[0:N]
     
-
-# if __name__ == '__main__':
-
-# In[]
-# item_cf = ItemCF(5)
-# item_cf.get_data_from_db()
-
-# # In[]
-# user_items = item_cf.get_user_items()
-# W = item_cf.ItemSimilarity(train=user_items)
-# # In[]
-
-# user = '7001215'
-# result = item_cf.recommend_to_one(train=user_items, user=user, W=W)
-# print(result)
-
-# In[]
-
-# lfm = LFMRecommend(10, 2, 0.2, 0.02)
-# lfm.get_data_from_db()
-# user_items = lfm.get_user_items()
-
-# # In[]
-# train = 
-# lfm.Recommend('', 10)

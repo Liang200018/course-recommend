@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 '''
 前后端结合的地方，涉及到数据库和HTMl
 读取数据库中的对象，结合模板渲染
@@ -685,4 +686,3 @@ def ViewSearch(request, **kwargs):
 def ViewAbout(request):
     allcategory = Category.objects.all()
     return render(request, 'page.html',locals())
-

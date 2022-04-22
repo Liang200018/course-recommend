@@ -14,8 +14,6 @@ from course.utils import Singleton # 单例模式
 from course.utils import ItemCombination # 生成物品对
 from course.recommend import RetrieveData, ItemCF # 获取数据库数据
 
-# In[]
-
 
 # In[2]
 
@@ -223,24 +221,3 @@ class ICF(Singleton):
                     (self.Int[i][j] / (math.sqrt(self.N[i]* self.N[j]) * 1.0)), 4) 
 
         del self.pairs
-
-
-if __name__ == '__main__':
-    icf = ICF()
-    train, items_pool, user_pool = icf.getData(limit_num=1000)
-    train = icf.prepareCompute(items_pool, user_pool, train)
-    # icf.preCompute({'1': [1, 2, 3],
-    #                 '2': [2, 3],
-    #                 '3': [2, 3, 4],
-    #                 })
-    
-    icf.preCompute(train)
-    
-    userid = '7001215'
-    # icf.writeToDB(userid, item_set) # 活跃用户的交互写入数据库
-    
-    # icf.updateIntByDB(userid, train)
-    # icf.updateS()
-    res = icf.recommend_to_one(train, userid)
-    print(res)
-    

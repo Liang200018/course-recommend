@@ -50,9 +50,3 @@ class ItemCombination:
 
     def getPairOfItem(self, items):
         return permutations(items, self.k)  
-
-
-    
-    
-    
-    
