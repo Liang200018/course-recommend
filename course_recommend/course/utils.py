@@ -4,8 +4,12 @@
 """
 
 import sqlite3
+import pymysql
+from dbutils.persistent_db import PersistentDB
+from dbutils.pooled_db import PooledDB
 
-
+from course_recommend.settings import DATABASES
+     
 def construct_sql(table_name, col_list=None, limit_num=None, where=None):
     """
     Parameters
@@ -50,3 +54,14 @@ class ItemCombination:
 
     def getPairOfItem(self, items):
         return permutations(items, self.k)  
+
+
+pool = PooledDB(pymysql, mincached=20, maxcached=40, maxshared=20, maxconnections=50, blocking=True,
+                host=DATABASES['default']['HOST'],
+                user=DATABASES['default']['USER'],
+                password=DATABASES['default']['PASSWORD'],
+                database=DATABASES['default']['NAME'],
+                charset=DATABASES['default']['OPTIONS']['charset'])
+
+
+ 

@@ -9,12 +9,14 @@ import numpy as np
 import pandas as pd
 import scipy.sparse as sp
 import math
+from threading import Lock
 
 from course.utils import Singleton # 单例模式
 from course.utils import ItemCombination # 生成物品对
+from course.utils import pool # 连接池
 from course.recommend import RetrieveData, ItemCF # 获取数据库数据
 
-
+fetcher = RetrieveData()
 # In[2]
 
 class ICF(Singleton):
@@ -116,12 +118,14 @@ class ICF(Singleton):
 
         rank = {} 
         try:
-            fetcher = RetrieveData()
-            user_item_set = fetcher._select_all(cursor=None, table_name='user_course',
-                                         col_list=['course_id'], where='user_id=%s' % (user))
-          
+            conn = pool.connection()
+            cursor = conn.cursor()
+            query = "select course_id from user_course where user_id='%s'" % (user)
+            cursor.execute(query)
+            user_item_set = cursor.fetchall()
             user_item_set = [t[0] for t in user_item_set]
-            
+            cursor.close()
+            conn.close()
             # user_item_set = train[user]  # 模型训练时
         except KeyError as e: # 新增用户没有数据
             print(e.args)

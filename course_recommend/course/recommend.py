@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # -*- coding: utf-8 -*-
 """
 Created on Thu Mar 31 16:13:53 2022
@@ -13,6 +12,8 @@ import copy
 import random
 import pymysql
 
+from threading import Lock
+from course.utils import pool # 连接池
 from collections import Counter
 
 from course.utils import construct_sql
@@ -38,33 +39,28 @@ class RetrieveData:
     items_pool = []
     
     # 打开数据库连接
-    conn = pymysql.connect(host=DATABASES['default']['HOST'],
-                         user=DATABASES['default']['USER'],
-                         password=DATABASES['default']['PASSWORD'],
-                         database=DATABASES['default']['NAME'],
-                         charset = DATABASES['default']['OPTIONS']['charset']
-                        )
+    conn = pool.connection()
     
     def __init__(self):
-        pass
+        self.lock = Lock() # 锁
     
     def reConnect(self):
         self.conn.ping(reconnect=True) # 如果连接失效，重新连接 
 
     def _select_all(self, cursor, table_name, col_list=None, limit_num=None, where=None):
-
         sql = construct_sql(table_name, col_list, limit_num, where)
         print(sql)
         
         res = None
-        # try:
         self.reConnect()
+        # 线程锁保护
+        self.lock.acquire(blocking=True, timeout=-1) #被多线程调用时阻塞
+        
         with self.conn.cursor() as cursor: 
             cursor.execute(sql)
             res = cursor.fetchall()
         
-        # except Exception as e:
-            # print(e.args)
+        self.lock.release()
         return res
         
     def get_data_from_db(self, limit_num=None):
